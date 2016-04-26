@@ -17,6 +17,35 @@ def file_exists(f, r, b):
 	if kill:
 		sys.exit()		
 
+description = """
+Help file for Flip2BeRAD.
+
+-c <cutsite(s)> or --cutsites=<cutsite(s)>]
+	The restriction cut site used. Can be its name or actual sequence 
+	but not	both (for now). If multiple cutsites were used, specify them 
+	with a	',' (e.g., <pstI,nsiI>).  
+
+-f <foward file>
+	The forward reads fastq file. Must be the same length as the reverse 
+	(paired-end) fastq file. 
+
+-r <reverse file>
+	The reverse (paired-end) reads fastq file. Must be the same length as 
+	the forward fastq file. 
+
+-b <barcodes file> 
+	A one-column file specifiying the sequnence of each of the sample 
+	barcodes to use. 
+
+-m <number of mismatches>
+	Optional. The number (integer) of mismatches allowed in the barcode 
+	region.	Warning, this should not be above 0 if barcodes are not 
+	'redundant'.
+
+-q <quiet>
+	Optional. Turn off verbose printing. 	
+	"""
+
 def main(argv):
 	""" This function parses out the command-line arguments."""
 	forward_file = ' '
@@ -26,16 +55,16 @@ def main(argv):
 	n_mismatches = 0
 	cutsites = 'pstI'
 	
-	usage = 'Flip2BeRAD.py -c <cutsite or cutsite1,cutsite2,...> -f <forward.fastq> -r <reverse.fastq> -b <barcode.list> -m <num of mismatches allowed in barcode> -q'
+	usage = 'Flip2BeRAD.py -h [for help file] -c <cutsite or cutsite1,cutsite2,...> -f <forward.fastq> -r <reverse.fastq> -b <barcode.list> -m <num of mismatches allowed in barcode> -q'
 	try:
-		opts, args = getopt.getopt(argv,"h:c:f:r:b:m:q",["cutsites=", "forward.fastq=","reverse.fastq=", "barcode.list", "quiet"])
+		opts, args = getopt.getopt(argv,"hc:f:r:b:m:q",["cutsites=", "forward.fastq=","reverse.fastq=", "barcode.list", "quiet"])
 	except getopt.GetoptError:
 		print usage
 		sys.exit(2)
 	
 	for opt, arg in opts:
 		if opt == '-h':
-			print usage
+			print description
 			sys.exit()
 		elif opt in ("-f", "--forward"):
 			forward_file = arg
@@ -68,17 +97,6 @@ def main(argv):
 
 if __name__ == "__main__":
    main(sys.argv[1:])
-
-print "OK"
-
-
-
-
-# # Here are the forward (f) and reverse (r) files.
-# forward_file = '../examples/forward_test.fastq'
-# reverse_file = '../examples/reverse_test.fastq'
-# VERBOSE = True
-
 
 
 # # Some helper functions for grouping
