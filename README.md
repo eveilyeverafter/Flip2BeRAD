@@ -1,5 +1,5 @@
 # Flip2BeRAD
-A Python repo for flipping RADseq reads
+A suite of Python scripts for flipping RADseq reads
 
 Right now I am brushing up on my Python skills and will be evolving this project as I go. 
 
