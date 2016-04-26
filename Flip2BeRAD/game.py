@@ -10,3 +10,7 @@ class Room(object):
 
     def add_paths(self, paths):
         self.paths.update(paths)
+
+x = Room("a", "this is the 'a' room")
+
+print x.description
