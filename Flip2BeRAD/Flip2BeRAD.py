@@ -164,12 +164,17 @@ def enumerate_mismatches(b_file, m):
 	if VERBOSE:
 		print "Creating a list of mismatched barcodes."
 	bars = []
-	with open(b_file) as b:
-		for line in b:
-			if line != '\n': # ignores if there's a just a new line (i.e., at the end)
-				# Now add the list of mismatches to the master list, removing the \n as needed.
-				bars += list(mismatch_it(line.rstrip('\n'), m))
-				# bars.append(line.rstrip('\n')) # omitted
+
+	if m !=0:
+		with open(b_file) as b:
+			for line in b:
+				if line != '\n': # ignores if there's a just a new line (i.e., at the end)
+					# Now add the list of mismatches to the master list, removing the \n as needed.
+					bars += list(mismatch_it(line.rstrip('\n'), m))
+					# bars.append(line.rstrip('\n')) # omitted
+
+	if VERBOSE:
+		print "Number of mismatched barcodes: ", len(bars)
 	
 	# Now add the original barcodes to the list:
 	with open(b_file) as b:
@@ -177,15 +182,15 @@ def enumerate_mismatches(b_file, m):
 			if line != '\n':
 				bars.append(line.rstrip('\n'))
 	if VERBOSE:
-		print "Number of barcodes after adding originals: ", len(bars)
+		print "Number of mismatched + given barcodes: ", len(bars)
 
 	# Now check to make sure they are all unique
 	if len(bars) != len(set(bars)):
 		print "\nErrror:\tBarcodes with %i mismatches did not produce unique oligos.\n\t-->%i total barcodes but only %i unique<--\n\tReduce the number of mismatches allowed and rerun." % (n_mismatches, len(bars), len(set(bars)))
 		sys.exit()
-	else:
-		if VERBOSE:
-			print "Total number of mismatched barcodes is %i\n" % len(bars)
+	# else:
+	# 	if VERBOSE:
+	# 		print "Total number of mismatched barcodes is %i\n" % len(bars)
 
 	return bars
 
@@ -215,9 +220,10 @@ def check_lengths(f, r):
 	assert total_length_f == total_length_r, "\n\nInput error:\tThe number of forward reads (%i) does not\n\t\tmatch the number of reverse reads (%i). Check\n\t\tforward and reverse fastq files." % ((total_length_f / 4.0), (total_length_r / 4.0))
 	return (total_length_f / 4)
 
-# get some simple size data for making progress bars and log files
-n_pairs = check_lengths(forward_file, reverse_file) # Gets the number of pairs
-increment = round((n_pairs / 10)) # For showing progress percentages
+if VERBOSE:
+	# get some simple size data for making progress bars and log files
+	n_pairs = check_lengths(forward_file, reverse_file) # Gets the number of pairs
+	increment = round((n_pairs / 10)) # For showing progress percentages
 
 # Here's the enumerated (fuzzy matched) barcodes
 bars = enumerate_mismatches(barcodes_file, n_mismatches)
@@ -311,7 +317,6 @@ if VERBOSE:
 	    print "Of the %i reads containing barcodes, %i were found on\nthe forward and %i were found on the paired-end read.\n" % (n_barcodes_found, n_barcodes_on_forward, n_barcodes_on_reverse)
 	    print "Of the %i reads containing barcodes, %i had adjacent cutsites (%i did not)." % (n_barcodes_found,n_reads_with_barcode_yes_cut,n_reads_with_barcode_no_cut)
 else: 
-	# print "Processing %i pairs from files\n%r and\n%r\n" % (n_pairs, forward_file, reverse_file)
 	# The main loop. This block: 
 	# 1. iterates 4 lines at a time from each of the f and r fastq files (== 8 total lines)
 	with open(forward_file) as f, open(reverse_file) as r:
