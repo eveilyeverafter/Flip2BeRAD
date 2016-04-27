@@ -3,6 +3,7 @@ import sys, getopt # For parsing command line args
 import os.path # For checking whether a given file exists
 # from fuzzywuzzy import fuzz # For fuzzy matching
 from itertools import combinations, product
+from Bio.Seq import reverse_complement # working with strings
 
 def file_exists(f, r, b):
 	""" This function checks to see if the user-given files exists """
@@ -55,6 +56,7 @@ barcodes_file = ' '
 VERBOSE = True
 n_mismatches = 0
 cutsites = 'pstI'
+offset = 0 # This is the nucleotide offset for barcode parsing
 
 def main(argv):
 	""" This function parses out the command-line arguments."""
@@ -113,7 +115,7 @@ def mismatch_it(s, d=n_mismatches):
 	""" This enumerates all the mismatches of a given barcode."""
 	# http://stackoverflow.com/questions/19822847/how-to-generate-all-strings-with-d-mismatches-python
 	N = len(s)
-	letters = 'ACGT'
+	letters = 'ACGTN'
 	pool = list(s)
 
 	for indices in combinations(range(N), d):
@@ -140,68 +142,72 @@ def enumerate_mismatches(b_file, m):
 	
 	# Now check to make sure they are all unique
 	if len(bars) != len(set(bars)):
-		print "\nErrror:\tBarcodes with %i mismatches did not produce unique oligos.\nReduce the number of mismatches allowed and rerun." % n_mismatches
+		print "\nErrror:\tBarcodes with %i mismatches did not produce unique oligos.\n\t-->%i total barcodes but only %i unique<--\n\tReduce the number of mismatches allowed and rerun." % (n_mismatches, len(bars), len(set(bars)))
 		sys.exit()
 	else:
+		if VERBOSE:
+			print "Total number of mismatched barcodes is %i\n" % len(bars)
 		return bars
 
+# Some helper functions for grouping
+# From https://docs.python.org/2/library/itertools.html#recipes
+def grouper(iterable, n, fillvalue=None):
+    "Collect data into fixed-length chunks or blocks"
+    # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
+    args = [iter(iterable)] * n
+    return itertools.izip_longest(fillvalue=fillvalue, *args)
+
+def flatten(listOfLists):
+    "Flatten one level of nesting"
+    return itertools.chain.from_iterable(listOfLists)
+
+def file_len(fname):
+    with open(fname) as f:
+        for i, l in enumerate(f):
+            pass
+    return i + 1
+
+def check_lengths(f, r):
+	""" Checks to see if forward and reverse files are the same length """
+	total_length_f = file_len(f)
+	total_length_r = file_len(r)
+	assert total_length_f == total_length_r, "\n\nInput error:\tThe number of forward reads (%i) does not\n\t\tmatch the number of reverse reads (%i). Check\n\t\tforward and reverse fastq files." % ((total_length_f / 4.0), (total_length_r / 4.0))
+	return (total_length_f / 4)
+
+# get some simple size data for making progress bars and log files
+n_pairs = check_lengths(forward_file, reverse_file) # Gets the number of pairs
+increment = round((n_pairs / 10)) # For showing progress percentages
+
+# Here's the enumerated (fuzzy matched) barcodes
 bars = enumerate_mismatches(barcodes_file, n_mismatches)
+barcode_length = len(bars[0])
+print "Barcode length is: ", barcode_length
 
 
+if VERBOSE:
+	print "Processing %i pairs from files\n%r and\n%r" % (n_pairs, forward_file, reverse_file)
+	# The main loop. This block: 
+	# 1. iterates 4 lines at a time from each of the f and r fastq files (=8 total lines)
+	# 2. and prints them.
+	with open(forward_file) as f, open(reverse_file) as r:
+	    pairs1 = grouper(f, 4) # group the forward file 4 lines at a time
+	    pairs2 = grouper(r, 4) # group the reverse file 4 lines at a time
+	    zipped_pairs = itertools.izip(pairs1, pairs2)
 
-# # Some helper functions for grouping
-# # From https://docs.python.org/2/library/itertools.html#recipes
-# def grouper(iterable, n, fillvalue=None):
-#     "Collect data into fixed-length chunks or blocks"
-#     # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
-#     args = [iter(iterable)] * n
-#     return itertools.izip_longest(fillvalue=fillvalue, *args)
+	    n_barcodes_found = 0
+	    for i, zipped_pair in enumerate(zipped_pairs):
+	        f_line1, f_line2, f_line3, f_line4, r_line1, r_line2, r_line3, r_line4 = flatten(zipped_pair)
+	        if i % increment == 0:
+	        	print "%d%% complete\r" % (10*i/increment + 10)
+	        if (f_line2[offset:barcode_length] in bars) or (r_line2[offset:barcode_length] in bars): 
+	        	n_barcodes_found += 1
+	        	if f_line2[offset:barcode_length] in bars:
+	        		print f_line2,
+	        	else:
+	        		print r_line2,
+	    print "Number of reads found containg barcodes: %i (out of %i)" % (n_barcodes_found, n_pairs)
+else: 
+	print "This block under construction..."
 
-# def flatten(listOfLists):
-#     "Flatten one level of nesting"
-#     return itertools.chain.from_iterable(listOfLists)
-
-# def file_len(fname):
-#     with open(fname) as f:
-#         for i, l in enumerate(f):
-#             pass
-#     return i + 1
-
-# def check_lengths(f, r):
-# 	""" Checks to see if forward and reverse files are the same length """
-# 	total_length_f = file_len(f)
-# 	total_length_r = file_len(r)
-# 	assert total_length_f == total_length_r, "\n\nInput error:\tThe number of forward reads (%i) does not\n\t\tmatch the number of reverse reads (%i). Check\n\t\tforward and reverse fastq files." % ((total_length_f / 4.0), (total_length_r / 4.0))
-# 	return (total_length_f / 4)
-
-# n_pairs = check_lengths(forward_file, reverse_file)
-
-# increment = round((n_pairs / 10))
-
-
-# if VERBOSE:
-# 	print "Processing %i pairs from files\n%r and\n%r" % (n_pairs, forward_file, reverse_file)
-# 	# The main loop. This block: 
-# 	# 1. iterates 4 lines at a time from each of the f and r fastq files (=8 total lines)
-# 	# 2. and prints them.
-# 	with open(forward_file) as f, open(reverse_file) as r:
-# 	    pairs1 = grouper(f, 4) # group the forward file 4 lines at a time
-# 	    pairs2 = grouper(r, 4) # group the reverse file 4 lines at a time
-# 	    zipped_pairs = itertools.izip(pairs1, pairs2)
-# 	    for i, zipped_pair in enumerate(zipped_pairs):
-# 	        f_line1, f_line2, f_line3, f_line4, r_line1, r_line2, r_line3, r_line4 = flatten(zipped_pair)
-# 	        if i % increment == 0:
-# 	        	print "%d%% complete\r" % (10*i/increment + 10)
-# 	        print f_line1, r_line1, f_line2, r_line2, f_line3, r_line3, f_line4, r_line4
-
-# else: 
-# 	print "This block under construction..."
-
-# bar = ['atc', 'rad', 'abc']
-# if 'abc' in bar:
-# 	print "yes"
-
-# x = fuzz.ratio("this is a test", ["this is a test!", "This is a test"])
-# print x
 
 
