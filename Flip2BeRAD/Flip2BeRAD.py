@@ -11,6 +11,8 @@ class Tee: # log file generation
     def write(self, *args, **kwargs):
         self.out1.write(*args, **kwargs)
         self.out2.write(*args, **kwargs)
+    def write_silent(self, *args, **kwargs):
+		self.out1.write(*args, **kwargs)   	
     def __init__(self, out1, out2):
         self.out1 = out1
         self.out2 = out2
@@ -121,6 +123,10 @@ Go to https://github.com/tylerhether/Flip2BeRAD for more information.\n"""
 		print 'The reverse fastq file is ', reverse_file
 		print 'The barcode file is ', barcodes_file
 		print 'The number of mismatches allowed in the bacode sequence: %d\n\n' % n_mismatches
+	else:
+		sys.stdout.write_silent("""
+This is Flip2BeRAD. Run this scrpt with -h flag to see the help file.
+Go to https://github.com/tylerhether/Flip2BeRAD for more information.""")
 
 if __name__ == "__main__":
    main(sys.argv[1:])
@@ -232,7 +238,7 @@ if VERBOSE:
 	        if (f_line2[(offset):(barcode_length+offset)] in bars) or (r_line2[offset:(barcode_length+offset)] in bars): 
 	        	n_barcodes_found += 1
 
-	        	# Is there a cut site next to the barcode on either read? If 
+	        	# 3. Is there a cut site next to the barcode on either read? If 
 	        	# not, output to a 'remainder file'. If on the forward, print to 
 	        	# main filtered files. If on reverse, print the flipped pair to file.
 	        	if (f_line2[(offset):(barcode_length+offset)] in bars): 
@@ -252,7 +258,6 @@ if VERBOSE:
 		        		barcode_no_cut_forward.write(f_line1); barcode_no_cut_forward.write(f_line2); barcode_no_cut_forward.write(f_line3); barcode_no_cut_forward.write(f_line4)
 		        		barcode_no_cut_reverse.write(r_line1); barcode_no_cut_reverse.write(r_line2); barcode_no_cut_reverse.write(r_line3); barcode_no_cut_reverse.write(r_line4)
 
-	        	# elif (r_line2[(offset):(barcode_length+offset)] in bars): 
 	        	else:
 	        		n_barcodes_on_reverse += 1
 	        		if r_line2[offset+barcode_length:].startswith(tuple(cutsites)):
@@ -270,12 +275,6 @@ if VERBOSE:
 		        		barcode_no_cut_forward.write(f_line1); barcode_no_cut_forward.write(f_line2); barcode_no_cut_forward.write(f_line3); barcode_no_cut_forward.write(f_line4)
 		        		barcode_no_cut_reverse.write(r_line1); barcode_no_cut_reverse.write(r_line2); barcode_no_cut_reverse.write(r_line3); barcode_no_cut_reverse.write(r_line4)
 
-	        	# else:
-	        	# 	# n_reads_with_barcode_no_cut += 1
-	        	# 	# barcode_no_cut_forward.write(f_line1); barcode_no_cut_forward.write(f_line2); barcode_no_cut_forward.write(f_line3); barcode_no_cut_forward.write(f_line4)
-	        	# 	# barcode_no_cut_reverse.write(r_line1); barcode_no_cut_reverse.write(r_line2); barcode_no_cut_reverse.write(r_line3); barcode_no_cut_reverse.write(r_line4)
-	        	# 	print "Stop. This code show never run."
-	        	# 	sys.exit()
 	        else:
 	        	# If no barcode present on the forward or reverse read, output into 'nobarcode' file
 	        	n_reads_with_no_barcode += 1
@@ -289,7 +288,72 @@ if VERBOSE:
 	    print "Of the %i reads containing barcodes, %i were found on\nthe forward and %i were found on the paired-end read.\n" % (n_barcodes_found, n_barcodes_on_forward, n_barcodes_on_reverse)
 	    print "Of the %i reads containing barcodes, %i had adjacent cutsites (%i did not)." % (n_barcodes_found,n_reads_with_barcode_yes_cut,n_reads_with_barcode_no_cut)
 else: 
-	print "This block under construction..."
+	# print "Processing %i pairs from files\n%r and\n%r\n" % (n_pairs, forward_file, reverse_file)
+	# The main loop. This block: 
+	# 1. iterates 4 lines at a time from each of the f and r fastq files (== 8 total lines)
+	with open(forward_file) as f, open(reverse_file) as r:
+	    pairs1 = grouper(f, 4) # group the forward file 4 lines at a time
+	    pairs2 = grouper(r, 4) # group the reverse file 4 lines at a time
+	    zipped_pairs = itertools.izip(pairs1, pairs2)
+
+	    # These are counters for various summary stats
+	    n_barcodes_found = 0
+	    n_barcodes_on_forward = 0
+	    n_barcodes_on_reverse = 0
+	    n_reads_with_no_barcode = 0
+	    n_reads_with_barcode_no_cut = 0
+	    n_reads_with_barcode_yes_cut = 0
+
+	    for i, zipped_pair in enumerate(zipped_pairs):
+	        f_line1, f_line2, f_line3, f_line4, r_line1, r_line2, r_line3, r_line4 = flatten(zipped_pair)
+
+	        # 2. (fuzzy) Barcode present on of the reads?
+	        if (f_line2[(offset):(barcode_length+offset)] in bars) or (r_line2[offset:(barcode_length+offset)] in bars): 
+	        	n_barcodes_found += 1
+
+	        	# 3. Is there a cut site next to the barcode on either read? If 
+	        	# not, output to a 'remainder file'. If on the forward, print to 
+	        	# main filtered files. If on reverse, print the flipped pair to file.
+	        	if (f_line2[(offset):(barcode_length+offset)] in bars): 
+	        		n_barcodes_on_forward += 1
+	        		if f_line2[offset+barcode_length:].startswith(tuple(cutsites)):
+	        			n_reads_with_barcode_yes_cut += 1
+	        			barcode_yes_cut_forward.write(f_line1)
+	        			barcode_yes_cut_forward.write(f_line2)
+	        			barcode_yes_cut_forward.write(f_line3)
+	        			barcode_yes_cut_forward.write(f_line4)	
+	        			barcode_yes_cut_reverse.write(r_line1)
+	        			barcode_yes_cut_reverse.write(r_line2)
+	        			barcode_yes_cut_reverse.write(r_line3)
+	        			barcode_yes_cut_reverse.write(r_line4)	
+	        		else:
+		        		n_reads_with_barcode_no_cut += 1
+		        		barcode_no_cut_forward.write(f_line1); barcode_no_cut_forward.write(f_line2); barcode_no_cut_forward.write(f_line3); barcode_no_cut_forward.write(f_line4)
+		        		barcode_no_cut_reverse.write(r_line1); barcode_no_cut_reverse.write(r_line2); barcode_no_cut_reverse.write(r_line3); barcode_no_cut_reverse.write(r_line4)
+
+	        	else:
+	        		n_barcodes_on_reverse += 1
+	        		if r_line2[offset+barcode_length:].startswith(tuple(cutsites)):
+	        			n_reads_with_barcode_yes_cut += 1
+	        			barcode_yes_cut_forward.write(r_line1)
+	        			barcode_yes_cut_forward.write(r_line2)
+	        			barcode_yes_cut_forward.write(r_line3)
+	        			barcode_yes_cut_forward.write(r_line4)	
+	        			barcode_yes_cut_reverse.write(f_line1)
+	        			barcode_yes_cut_reverse.write(f_line2)
+	        			barcode_yes_cut_reverse.write(f_line3)
+	        			barcode_yes_cut_reverse.write(f_line4)	
+	        		else:
+		        		n_reads_with_barcode_no_cut += 1
+		        		barcode_no_cut_forward.write(f_line1); barcode_no_cut_forward.write(f_line2); barcode_no_cut_forward.write(f_line3); barcode_no_cut_forward.write(f_line4)
+		        		barcode_no_cut_reverse.write(r_line1); barcode_no_cut_reverse.write(r_line2); barcode_no_cut_reverse.write(r_line3); barcode_no_cut_reverse.write(r_line4)
+
+	        else:
+	        	# If no barcode present on the forward or reverse read, output into 'nobarcode' file
+	        	n_reads_with_no_barcode += 1
+	        	nobarcodes_forward.write(f_line1); nobarcodes_forward.write(f_line2); nobarcodes_forward.write(f_line3); nobarcodes_forward.write(f_line4)
+	        	nobarcodes_reverse.write(r_line1); nobarcodes_reverse.write(r_line2); nobarcodes_reverse.write(r_line3); nobarcodes_reverse.write(r_line4)
+
 
 # Housekeeping
 nobarcodes_forward.close()
@@ -298,27 +362,6 @@ barcode_no_cut_forward.close()
 barcode_no_cut_reverse.close()
 barcode_yes_cut_forward.close()
 barcode_yes_cut_reverse.close()
-
-
-
-# Testing
-
-# cutsites
-# b = 'GGCATACCAATGCATAAGCAACGTGCGCCTTTGAGACTTCTAGTTGCTCCCAGATAGCCATAATATCTAGCTAAGTTCAGGATT'
-
-# print b
-# print "*"*10 + b[offset+barcode_length:]
-
-# print "*"*offset + b[(offset):(barcode_length+offset)]
-# # GG
-# # CATACCAA
-# # TGCAT
-
-# if b[offset+barcode_length:].startswith(tuple(cutsites)):
-# 	print "ok"
-
-
-
 
 
 
