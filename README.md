@@ -1,13 +1,30 @@
 # Flip2BeRAD
 A suite of Python scripts for flipping RADseq reads
 
-Right now I am brushing up on my Python skills and will be evolving this project as I go. 
+Flip2BeRAD is a utility for flipping the forward and reverse raw
+reads generated from paired-end sequencing. For some RADseq protocols
+(e.g., BestRAD), the barcode plus cut site combination can 
+occur on the reverse read. This is problematic when downstream programs
+(e.g., stacks) require that these be on the forward read. Flip2BeRAD 
+performs the following tasks: 
 
-There are two main goals: 
-First, I will be converting the flip script that was written in Perl into Python.
-Second, I'll be adding additional functionality to incorporate new features (like, a user-given rad site(s), mismatch acceptance, etc.). 
+1. Remove any reads that do not contain a barcode on either the forward
+or the reverse read. n-bp mismatching of the barcode is allowed (i.e., 
+this assumes your barcodes are n-bp redundant). 
 
-To run, you need the following modules installed via pip:
+2. Identifies whether a cute site is adjacent to the barcode sequence. 
+Multiple cut sites can simultaneously be searched. 
+
+3. Output data goes in three bins: a) those without a barcode, b) those
+with a barcode but no adjacent cut site, and c) filtered reads containing
+a barcode and a cut site
+
+To install, clone the github repo and navigate to Flip2BeRAD.py script. 
+For help, type in the following:
+``` 
+python Flip2BeRAD.py -h
 ```
-pip install fuzzywuzzy
-```
+
+Please note, Flip2BeRAD was built under Python 2.7 so it is recommended
+that you use this version of python to run. 
+
