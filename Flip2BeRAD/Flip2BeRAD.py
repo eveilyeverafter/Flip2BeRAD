@@ -79,10 +79,6 @@ def main(argv):
 	global n_mismatches
 	global cutsites
 
-	print """
-This is Flip2BeRAD. Run this scrpt with -h flag to see the help file.
-Go to https://github.com/tylerhether/Flip2BeRAD for more information."""
-	
 	usage = 'Flip2BeRAD.py -h [for help file] -c <cutsite or cutsite1,cutsite2,...> -f <forward.fastq> -r <reverse.fastq> -b <barcode.list> -m <num of mismatches allowed in barcode> -q'
 	try:
 		opts, args = getopt.getopt(argv,"hc:f:r:b:m:q",["cutsites=", "forward.fastq=","reverse.fastq=", "barcode.list", "quiet"])
@@ -113,10 +109,13 @@ Go to https://github.com/tylerhether/Flip2BeRAD for more information."""
 
 	# Now check to make sure the files actually exist
 	file_exists(forward_file, reverse_file, barcodes_file)
-
+	
 	# Optional printing of arguments
 	if VERBOSE:
-		print '\nVerbose printing is ON. Use -q flag to turn OFF.'
+		print """
+This is Flip2BeRAD. Run this scrpt with -h flag to see the help file.
+Go to https://github.com/tylerhether/Flip2BeRAD for more information.\n"""
+		print 'Verbose printing is ON. Use -q flag to turn OFF.'
 		print 'Cutsite(s): %s' % cutsites
 		print 'The forward fastq file is ', forward_file
 		print 'The reverse fastq file is ', reverse_file
@@ -196,8 +195,7 @@ increment = round((n_pairs / 10)) # For showing progress percentages
 # Here's the enumerated (fuzzy matched) barcodes
 bars = enumerate_mismatches(barcodes_file, n_mismatches)
 barcode_length = len(bars[0])
-print "Barcode length is: ", barcode_length
-
+# print "Barcode length is: ", barcode_length # testing
 
 if VERBOSE:
 	print "Processing %i pairs from files\n%r and\n%r" % (n_pairs, forward_file, reverse_file)
@@ -227,6 +225,9 @@ if VERBOSE:
 	        	else:
 	        		n_barcodes_on_reverse += 1
 	        		print "Reverse: ", r_line2,
+
+
+	        		
 	    print "\nNumber of reads found containg barcodes: %i (out of %i).\n" % (n_barcodes_found, n_pairs)
 	    print "Of the %i reads containing barcodes, %i were found on\nthe forward and %i were found on the paired-end read.\n" % (n_barcodes_found, n_barcodes_on_forward, n_barcodes_on_reverse)
 else: 
