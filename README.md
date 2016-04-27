@@ -26,5 +26,5 @@ python Flip2BeRAD.py -h
 ```
 
 Please note, Flip2BeRAD was built under Python 2.7 so it is recommended
-that you use this version of python to run. 
+that you use this version of Python to run. 
 
