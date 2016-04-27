@@ -5,6 +5,16 @@ import os.path # For checking whether a given file exists
 from itertools import combinations, product
 from Bio.Seq import reverse_complement # working with strings
 
+
+class Tee(object):
+	""" This is used to copy print statements to the log file. """
+	# See http://stackoverflow.com/questions/17866724/python-logging-print-statements-while-having-them-print-to-stdout
+    def __init__(self, *files):
+        self.files = files
+    def write(self, obj):
+        for f in self.files:
+            f.write(obj)
+            
 def file_exists(f, r, b):
 	""" This function checks to see if the user-given files exists """
 	kill = False
@@ -19,6 +29,7 @@ def file_exists(f, r, b):
 		kill = True			
 	if kill:
 		sys.exit()		
+
 
 description = """
 Help file for Flip2BeRAD.

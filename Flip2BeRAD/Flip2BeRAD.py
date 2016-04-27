@@ -4,6 +4,18 @@ import os.path # For checking whether a given file exists
 # from fuzzywuzzy import fuzz # For fuzzy matching
 from itertools import combinations, product
 from Bio.Seq import reverse_complement # working with strings
+import sys
+
+
+class Tee: # log file generation
+    def write(self, *args, **kwargs):
+        self.out1.write(*args, **kwargs)
+        self.out2.write(*args, **kwargs)
+    def __init__(self, out1, out2):
+        self.out1 = out1
+        self.out2 = out2
+
+sys.stdout = Tee(open("log.txt", "w"), sys.stdout)
 
 def file_exists(f, r, b):
 	""" This function checks to see if the user-given files exists """
@@ -66,6 +78,10 @@ def main(argv):
 	global VERBOSE
 	global n_mismatches
 	global cutsites
+
+	print """
+This is Flip2BeRAD. Run this scrpt with -h flag to see the help file.
+Go to https://github.com/tylerhether/Flip2BeRAD for more information."""
 	
 	usage = 'Flip2BeRAD.py -h [for help file] -c <cutsite or cutsite1,cutsite2,...> -f <forward.fastq> -r <reverse.fastq> -b <barcode.list> -m <num of mismatches allowed in barcode> -q'
 	try:
@@ -100,7 +116,7 @@ def main(argv):
 
 	# Optional printing of arguments
 	if VERBOSE:
-		print '\n\n\nVerbose printing is ON. Use -q flag to turn OFF.'
+		print '\nVerbose printing is ON. Use -q flag to turn OFF.'
 		print 'Cutsite(s): %s' % cutsites
 		print 'The forward fastq file is ', forward_file
 		print 'The reverse fastq file is ', reverse_file
@@ -109,7 +125,6 @@ def main(argv):
 
 if __name__ == "__main__":
    main(sys.argv[1:])
-
 
 def mismatch_it(s, d=n_mismatches):
 	""" This enumerates all the mismatches of a given barcode."""
@@ -187,27 +202,38 @@ print "Barcode length is: ", barcode_length
 if VERBOSE:
 	print "Processing %i pairs from files\n%r and\n%r" % (n_pairs, forward_file, reverse_file)
 	# The main loop. This block: 
-	# 1. iterates 4 lines at a time from each of the f and r fastq files (=8 total lines)
-	# 2. and prints them.
+	# 1. iterates 4 lines at a time from each of the f and r fastq files (== 8 total lines)
 	with open(forward_file) as f, open(reverse_file) as r:
 	    pairs1 = grouper(f, 4) # group the forward file 4 lines at a time
 	    pairs2 = grouper(r, 4) # group the reverse file 4 lines at a time
 	    zipped_pairs = itertools.izip(pairs1, pairs2)
 
+	    # These are counters for various summary stats
 	    n_barcodes_found = 0
+	    n_barcodes_on_forward = 0
+	    n_barcodes_on_reverse = 0
+
 	    for i, zipped_pair in enumerate(zipped_pairs):
 	        f_line1, f_line2, f_line3, f_line4, r_line1, r_line2, r_line3, r_line4 = flatten(zipped_pair)
+	        # Prints percentage at 10% intervals (i.e., when VERBOSE == True)
 	        if i % increment == 0:
 	        	print "%d%% complete\r" % (10*i/increment + 10)
+	        # 2. Checks if a barcode is on the 5' end of the either single or paired-end read
 	        if (f_line2[offset:barcode_length] in bars) or (r_line2[offset:barcode_length] in bars): 
-	        	n_barcodes_found += 1
+	        	n_barcodes_found += 1 
 	        	if f_line2[offset:barcode_length] in bars:
-	        		print f_line2,
+	        		n_barcodes_on_forward += 1
+	        		print "Forward: ",f_line2,
 	        	else:
-	        		print r_line2,
-	    print "Number of reads found containg barcodes: %i (out of %i)" % (n_barcodes_found, n_pairs)
+	        		n_barcodes_on_reverse += 1
+	        		print "Reverse: ", r_line2,
+	    print "\nNumber of reads found containg barcodes: %i (out of %i).\n" % (n_barcodes_found, n_pairs)
+	    print "Of the %i reads containing barcodes, %i were found on\nthe forward and %i were found on the paired-end read.\n" % (n_barcodes_found, n_barcodes_on_forward, n_barcodes_on_reverse)
 else: 
 	print "This block under construction..."
+
+
+
 
 
 
