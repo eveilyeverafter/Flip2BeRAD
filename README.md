@@ -12,10 +12,10 @@ performs the following tasks:
 or the reverse read. n-bp mismatching of the barcode is allowed (i.e., 
 this assumes your barcodes are n-bp redundant). 
 
-2. Identifies whether a cute site is adjacent to the barcode sequence. 
+2. Identify whether a cute site is adjacent to the barcode sequence. 
 Multiple cut sites can simultaneously be searched. 
 
-3. Output data goes in three bins: a) those without a barcode, b) those
+3. Output data into three bins: a) those without a barcode, b) those
 with a barcode but no adjacent cut site, and c) filtered reads containing
 a barcode and a cut site
 
