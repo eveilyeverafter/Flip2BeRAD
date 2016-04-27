@@ -70,7 +70,7 @@ barcodes_file = ' '
 VERBOSE = True
 n_mismatches = 0
 cutsites = 'pstI'
-offset = 2 # This is the nucleotide offset for barcode parsing
+offset = 0 # This is the nucleotide offset for barcode parsing
 
 def main(argv):
 	""" This function parses out the command-line arguments."""
@@ -80,10 +80,11 @@ def main(argv):
 	global VERBOSE
 	global n_mismatches
 	global cutsites
+	global offset
 
-	usage = 'Flip2BeRAD.py -h [for help file] -c <cutsite or cutsite1,cutsite2,...> -f <forward.fastq> -r <reverse.fastq> -b <barcode.list> -m <num of mismatches allowed in barcode> -q'
+	usage = 'Flip2BeRAD.py -h [for help file] -c <cutsite or cutsite1,cutsite2,...> -f <forward.fastq> -r <reverse.fastq> -b <barcode.list> -m <num of mismatches allowed in barcode> -o <offset integer> -q'
 	try:
-		opts, args = getopt.getopt(argv,"hc:f:r:b:m:q",["cutsites=", "forward.fastq=","reverse.fastq=", "barcode.list", "quiet"])
+		opts, args = getopt.getopt(argv,"hc:f:r:b:m:o:q",["cutsites=", "forward.fastq=","reverse.fastq=", "barcode.list", "offset", "quiet"])
 	except getopt.GetoptError:
 		print usage
 		sys.exit(2)
@@ -108,6 +109,12 @@ def main(argv):
 				sys.exit()
 		elif opt in ("-c", "--cutsites"):
 			cutsites = arg.split(',')
+		elif opt in ("-o", "--offset"):
+			try:
+				offset = int(arg)
+			except ValueError:
+				print "The number of basepairs to offset must be an integer!"
+				sys.exit()
 
 	# Now check to make sure the files actually exist
 	file_exists(forward_file, reverse_file, barcodes_file)
@@ -123,6 +130,8 @@ Go to https://github.com/tylerhether/Flip2BeRAD for more information.\n"""
 		print 'The reverse fastq file is ', reverse_file
 		print 'The barcode file is ', barcodes_file
 		print 'The number of mismatches allowed in the bacode sequence: %d\n\n' % n_mismatches
+		if offset !=0:
+			print 'Offsetting by %i basepairs' % offset
 	else:
 		sys.stdout.write_silent("""
 This is Flip2BeRAD. Run this scrpt with -h flag to see the help file.
