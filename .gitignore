@@ -1,3 +1,11 @@
 *.pyc
 *.DS_Store
 *log.txt
+barcode_no_cut_forward.fastq
+barcode_no_cut_reverse.fastq
+filtered_forward.fastq
+filtered_reverse.fastq
+nobarcodes_forward.fastq
+nobarcodes_reverse.fastq
+
+
