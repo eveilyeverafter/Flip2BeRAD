@@ -17,7 +17,7 @@ Multiple cut sites can simultaneously be searched.
 
 3. Output data into three bins: a) those without a barcode, b) those
 with a barcode but no adjacent cut site, and c) filtered reads containing
-a barcode and a cut site
+a barcode and a cut site.
 
 To install, clone the github repo and navigate to Flip2BeRAD.py script. 
 For help, type in the following:
