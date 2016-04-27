@@ -1,5 +1,5 @@
 # Flip2BeRAD
-A suite of Python scripts for flipping RADseq reads
+A Python script for flipping RADseq reads
 
 Flip2BeRAD is a utility for flipping the forward and reverse raw
 reads generated from paired-end sequencing. For some RADseq protocols
