@@ -1,20 +1,21 @@
 import itertools # For grouping pair-end reads together
 import sys, getopt # For parsing command line args
 import os.path # For checking whether a given file exists
-# from fuzzywuzzy import fuzz # For fuzzy matching
 from itertools import combinations, product
 from Bio.Seq import reverse_complement # working with strings
+import sys
 
 
-class Tee(object):
-	""" This is used to copy print statements to the log file. """
-	# See http://stackoverflow.com/questions/17866724/python-logging-print-statements-while-having-them-print-to-stdout
-    def __init__(self, *files):
-        self.files = files
-    def write(self, obj):
-        for f in self.files:
-            f.write(obj)
-            
+class Tee: # log file generation
+    def write(self, *args, **kwargs):
+        self.out1.write(*args, **kwargs)
+        self.out2.write(*args, **kwargs)
+    def write_silent(self, *args, **kwargs):
+		self.out1.write(*args, **kwargs)   	
+    def __init__(self, out1, out2):
+        self.out1 = out1
+        self.out2 = out2
+
 def file_exists(f, r, b):
 	""" This function checks to see if the user-given files exists """
 	kill = False
@@ -30,36 +31,6 @@ def file_exists(f, r, b):
 	if kill:
 		sys.exit()		
 
-
-description = """
-Help file for Flip2BeRAD.
-
--c <cutsite(s)> or --cutsites=<cutsite(s)>]
-	The restriction cut site used. Can be its name or actual sequence 
-	but not	both (for now). If multiple cutsites were used, specify them 
-	with a	',' (e.g., <pstI,nsiI>).  
-
--f <foward file>
-	The forward reads fastq file. Must be the same length as the reverse 
-	(paired-end) fastq file. 
-
--r <reverse file>
-	The reverse (paired-end) reads fastq file. Must be the same length as 
-	the forward fastq file. 
-
--b <barcodes file> 
-	A one-column file specifiying the sequnence of each of the sample 
-	barcodes to use. 
-
--m <number of mismatches>
-	Optional. The number (integer) of mismatches allowed in the barcode 
-	region.	Warning, this should not be above 0 if barcodes are not 
-	'redundant'.
-
--q <quiet>
-	Optional. Turn off verbose printing. 	
-	"""
-
 # Here are some global variables that may be changed from the user.
 forward_file = ' '
 reverse_file = ' '
@@ -67,7 +38,7 @@ barcodes_file = ' '
 VERBOSE = True
 n_mismatches = 0
 cutsites = 'pstI'
-offset = 0 # This is the nucleotide offset for barcode parsing
+offset = 2 # This is the nucleotide offset for barcode parsing
 
 def main(argv):
 	""" This function parses out the command-line arguments."""
@@ -77,7 +48,7 @@ def main(argv):
 	global VERBOSE
 	global n_mismatches
 	global cutsites
-	
+
 	usage = 'Flip2BeRAD.py -h [for help file] -c <cutsite or cutsite1,cutsite2,...> -f <forward.fastq> -r <reverse.fastq> -b <barcode.list> -m <num of mismatches allowed in barcode> -q'
 	try:
 		opts, args = getopt.getopt(argv,"hc:f:r:b:m:q",["cutsites=", "forward.fastq=","reverse.fastq=", "barcode.list", "quiet"])
@@ -108,19 +79,25 @@ def main(argv):
 
 	# Now check to make sure the files actually exist
 	file_exists(forward_file, reverse_file, barcodes_file)
-
+	
 	# Optional printing of arguments
 	if VERBOSE:
-		print '\n\n\nVerbose printing is ON. Use -q flag to turn OFF.'
+		print """
+This is Flip2BeRAD. Run this scrpt with -h flag to see the help file.
+Go to https://github.com/tylerhether/Flip2BeRAD for more information.\n"""
+		print 'Verbose printing is ON. Use -q flag to turn OFF.'
 		print 'Cutsite(s): %s' % cutsites
 		print 'The forward fastq file is ', forward_file
 		print 'The reverse fastq file is ', reverse_file
 		print 'The barcode file is ', barcodes_file
 		print 'The number of mismatches allowed in the bacode sequence: %d\n\n' % n_mismatches
+	else:
+		sys.stdout.write_silent("""
+This is Flip2BeRAD. Run this scrpt with -h flag to see the help file.
+Go to https://github.com/tylerhether/Flip2BeRAD for more information.""")
 
 if __name__ == "__main__":
    main(sys.argv[1:])
-
 
 def mismatch_it(s, d=n_mismatches):
 	""" This enumerates all the mismatches of a given barcode."""
@@ -130,6 +107,7 @@ def mismatch_it(s, d=n_mismatches):
 	pool = list(s)
 
 	for indices in combinations(range(N), d):
+		# print indices
 		for replacements in product(letters, repeat=d):
 			skip = False
 			for i, a in zip(indices, replacements):
@@ -150,7 +128,16 @@ def enumerate_mismatches(b_file, m):
 			if line != '\n': # ignores if there's a just a new line (i.e., at the end)
 				# Now add the list of mismatches to the master list, removing the \n as needed.
 				bars += list(mismatch_it(line.rstrip('\n'), m))
+				# bars.append(line.rstrip('\n')) # omitted
 	
+	# Now add the original barcodes to the list:
+	with open(b_file) as b:
+		for line in b:
+			if line != '\n':
+				bars.append(line.rstrip('\n'))
+	if VERBOSE:
+		print "Number of barcodes after adding originals: ", len(bars)
+
 	# Now check to make sure they are all unique
 	if len(bars) != len(set(bars)):
 		print "\nErrror:\tBarcodes with %i mismatches did not produce unique oligos.\n\t-->%i total barcodes but only %i unique<--\n\tReduce the number of mismatches allowed and rerun." % (n_mismatches, len(bars), len(set(bars)))
@@ -158,7 +145,9 @@ def enumerate_mismatches(b_file, m):
 	else:
 		if VERBOSE:
 			print "Total number of mismatched barcodes is %i\n" % len(bars)
-		return bars
+
+	return bars
+
 
 # Some helper functions for grouping
 # From https://docs.python.org/2/library/itertools.html#recipes
@@ -185,6 +174,5 @@ def check_lengths(f, r):
 	assert total_length_f == total_length_r, "\n\nInput error:\tThe number of forward reads (%i) does not\n\t\tmatch the number of reverse reads (%i). Check\n\t\tforward and reverse fastq files." % ((total_length_f / 4.0), (total_length_r / 4.0))
 	return (total_length_f / 4)
 
-def multiply(a,b):
-	return a*b
+# End of Script
 

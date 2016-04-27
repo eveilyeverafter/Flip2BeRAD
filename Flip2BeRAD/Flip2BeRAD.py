@@ -1,7 +1,6 @@
 import itertools # For grouping pair-end reads together
 import sys, getopt # For parsing command line args
 import os.path # For checking whether a given file exists
-# from fuzzywuzzy import fuzz # For fuzzy matching
 from itertools import combinations, product
 from Bio.Seq import reverse_complement # working with strings
 import sys
@@ -38,9 +37,10 @@ description = """
 Help file for Flip2BeRAD.
 
 -c <cutsite(s)> or --cutsites=<cutsite(s)>]
-	The restriction cut site used. Can be its name or actual sequence 
-	but not	both (for now). If multiple cutsites were used, specify them 
-	with a	',' (e.g., <pstI,nsiI>).  
+	The restriction cut site(s) used. Currently, the actual sequence 
+	is needed. If multiple cutsites were used, specify them 
+	with a	',' (e.g., <TGCAT,TGCAC>). Cut sites need not be the same
+	length as one another.  
 
 -f <foward file>
 	The forward reads fastq file. Must be the same length as the reverse 
@@ -52,7 +52,7 @@ Help file for Flip2BeRAD.
 
 -b <barcodes file> 
 	A one-column file specifiying the sequnence of each of the sample 
-	barcodes to use. 
+	barcodes to use. Currently these barcodes need to be the *same* length
 
 -m <number of mismatches>
 	Optional. The number (integer) of mismatches allowed in the barcode 
@@ -139,6 +139,7 @@ def mismatch_it(s, d=n_mismatches):
 	pool = list(s)
 
 	for indices in combinations(range(N), d):
+		# print indices
 		for replacements in product(letters, repeat=d):
 			skip = False
 			for i, a in zip(indices, replacements):
@@ -159,7 +160,16 @@ def enumerate_mismatches(b_file, m):
 			if line != '\n': # ignores if there's a just a new line (i.e., at the end)
 				# Now add the list of mismatches to the master list, removing the \n as needed.
 				bars += list(mismatch_it(line.rstrip('\n'), m))
+				# bars.append(line.rstrip('\n')) # omitted
 	
+	# Now add the original barcodes to the list:
+	with open(b_file) as b:
+		for line in b:
+			if line != '\n':
+				bars.append(line.rstrip('\n'))
+	if VERBOSE:
+		print "Number of barcodes after adding originals: ", len(bars)
+
 	# Now check to make sure they are all unique
 	if len(bars) != len(set(bars)):
 		print "\nErrror:\tBarcodes with %i mismatches did not produce unique oligos.\n\t-->%i total barcodes but only %i unique<--\n\tReduce the number of mismatches allowed and rerun." % (n_mismatches, len(bars), len(set(bars)))
@@ -167,7 +177,9 @@ def enumerate_mismatches(b_file, m):
 	else:
 		if VERBOSE:
 			print "Total number of mismatched barcodes is %i\n" % len(bars)
-		return bars
+
+	return bars
+
 
 # Some helper functions for grouping
 # From https://docs.python.org/2/library/itertools.html#recipes
@@ -201,8 +213,10 @@ increment = round((n_pairs / 10)) # For showing progress percentages
 # Here's the enumerated (fuzzy matched) barcodes
 bars = enumerate_mismatches(barcodes_file, n_mismatches)
 barcode_length = len(bars[0])
-# print "Barcode length is: ", barcode_length # testing
 
+if VERBOSE:
+	print "Barcode length is: ", barcode_length # testing
+	# print "The number of total barcodes to search is: ", len(set(bars))
 
 # This opens some of the 'remainder' files:
 nobarcodes_forward = open("nobarcodes_forward.fastq", 'w')
@@ -363,9 +377,5 @@ barcode_no_cut_reverse.close()
 barcode_yes_cut_forward.close()
 barcode_yes_cut_reverse.close()
 
-
-
-
-
-
+# End of Script
 

@@ -11,9 +11,9 @@ def teardown():
 def test_basic():
     print "I RAN!"
 
-def test_multiply1():
-	x = multiply(3,4)
-	assert x == 12
+# def test_multiply1():
+# 	x = multiply(3,4)
+# 	assert x == 12
 
 def test_file_len():
 	x = file_len("./examples/forward_test.fastq")
