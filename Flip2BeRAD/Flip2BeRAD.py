@@ -68,7 +68,7 @@ barcodes_file = ' '
 VERBOSE = True
 n_mismatches = 0
 cutsites = 'pstI'
-offset = 0 # This is the nucleotide offset for barcode parsing
+offset = 2 # This is the nucleotide offset for barcode parsing
 
 def main(argv):
 	""" This function parses out the command-line arguments."""
@@ -197,8 +197,17 @@ bars = enumerate_mismatches(barcodes_file, n_mismatches)
 barcode_length = len(bars[0])
 # print "Barcode length is: ", barcode_length # testing
 
+
+# This opens some of the 'remainder' files:
+nobarcodes_forward = open("nobarcodes_forward.fastq", 'w')
+nobarcodes_reverse = open("nobarcodes_reverse.fastq", 'w')
+barcode_no_cut_forward = open("barcode_no_cut_forward.fastq", 'w')
+barcode_no_cut_reverse = open("barcode_no_cut_reverse.fastq", 'w')
+barcode_yes_cut_forward = open("filtered_forward.fastq", 'w')
+barcode_yes_cut_reverse = open("filtered_reverse.fastq", 'w')
+
 if VERBOSE:
-	print "Processing %i pairs from files\n%r and\n%r" % (n_pairs, forward_file, reverse_file)
+	print "Processing %i pairs from files\n%r and\n%r\n" % (n_pairs, forward_file, reverse_file)
 	# The main loop. This block: 
 	# 1. iterates 4 lines at a time from each of the f and r fastq files (== 8 total lines)
 	with open(forward_file) as f, open(reverse_file) as r:
@@ -210,28 +219,107 @@ if VERBOSE:
 	    n_barcodes_found = 0
 	    n_barcodes_on_forward = 0
 	    n_barcodes_on_reverse = 0
+	    n_reads_with_no_barcode = 0
+	    n_reads_with_barcode_no_cut = 0
+	    n_reads_with_barcode_yes_cut = 0
 
 	    for i, zipped_pair in enumerate(zipped_pairs):
 	        f_line1, f_line2, f_line3, f_line4, r_line1, r_line2, r_line3, r_line4 = flatten(zipped_pair)
 	        # Prints percentage at 10% intervals (i.e., when VERBOSE == True)
 	        if i % increment == 0:
 	        	print "%d%% complete\r" % (10*i/increment + 10)
-	        # 2. Checks if a barcode is on the 5' end of the either single or paired-end read
-	        if (f_line2[offset:barcode_length] in bars) or (r_line2[offset:barcode_length] in bars): 
-	        	n_barcodes_found += 1 
-	        	if f_line2[offset:barcode_length] in bars:
+	        # 2. (fuzzy) Barcode present on of the reads?
+	        if (f_line2[(offset):(barcode_length+offset)] in bars) or (r_line2[offset:(barcode_length+offset)] in bars): 
+	        	n_barcodes_found += 1
+
+	        	# Is there a cut site next to the barcode on either read? If 
+	        	# not, output to a 'remainder file'. If on the forward, print to 
+	        	# main filtered files. If on reverse, print the flipped pair to file.
+	        	if (f_line2[(offset):(barcode_length+offset)] in bars): 
 	        		n_barcodes_on_forward += 1
-	        		print "Forward: ",f_line2,
+	        		if f_line2[offset+barcode_length:].startswith(tuple(cutsites)):
+	        			n_reads_with_barcode_yes_cut += 1
+	        			barcode_yes_cut_forward.write(f_line1)
+	        			barcode_yes_cut_forward.write(f_line2)
+	        			barcode_yes_cut_forward.write(f_line3)
+	        			barcode_yes_cut_forward.write(f_line4)	
+	        			barcode_yes_cut_reverse.write(r_line1)
+	        			barcode_yes_cut_reverse.write(r_line2)
+	        			barcode_yes_cut_reverse.write(r_line3)
+	        			barcode_yes_cut_reverse.write(r_line4)	
+	        		else:
+		        		n_reads_with_barcode_no_cut += 1
+		        		barcode_no_cut_forward.write(f_line1); barcode_no_cut_forward.write(f_line2); barcode_no_cut_forward.write(f_line3); barcode_no_cut_forward.write(f_line4)
+		        		barcode_no_cut_reverse.write(r_line1); barcode_no_cut_reverse.write(r_line2); barcode_no_cut_reverse.write(r_line3); barcode_no_cut_reverse.write(r_line4)
+
+	        	# elif (r_line2[(offset):(barcode_length+offset)] in bars): 
 	        	else:
 	        		n_barcodes_on_reverse += 1
-	        		print "Reverse: ", r_line2,
+	        		if r_line2[offset+barcode_length:].startswith(tuple(cutsites)):
+	        			n_reads_with_barcode_yes_cut += 1
+	        			barcode_yes_cut_forward.write(r_line1)
+	        			barcode_yes_cut_forward.write(r_line2)
+	        			barcode_yes_cut_forward.write(r_line3)
+	        			barcode_yes_cut_forward.write(r_line4)	
+	        			barcode_yes_cut_reverse.write(f_line1)
+	        			barcode_yes_cut_reverse.write(f_line2)
+	        			barcode_yes_cut_reverse.write(f_line3)
+	        			barcode_yes_cut_reverse.write(f_line4)	
+	        		else:
+		        		n_reads_with_barcode_no_cut += 1
+		        		barcode_no_cut_forward.write(f_line1); barcode_no_cut_forward.write(f_line2); barcode_no_cut_forward.write(f_line3); barcode_no_cut_forward.write(f_line4)
+		        		barcode_no_cut_reverse.write(r_line1); barcode_no_cut_reverse.write(r_line2); barcode_no_cut_reverse.write(r_line3); barcode_no_cut_reverse.write(r_line4)
 
+	        	# else:
+	        	# 	# n_reads_with_barcode_no_cut += 1
+	        	# 	# barcode_no_cut_forward.write(f_line1); barcode_no_cut_forward.write(f_line2); barcode_no_cut_forward.write(f_line3); barcode_no_cut_forward.write(f_line4)
+	        	# 	# barcode_no_cut_reverse.write(r_line1); barcode_no_cut_reverse.write(r_line2); barcode_no_cut_reverse.write(r_line3); barcode_no_cut_reverse.write(r_line4)
+	        	# 	print "Stop. This code show never run."
+	        	# 	sys.exit()
+	        else:
+	        	# If no barcode present on the forward or reverse read, output into 'nobarcode' file
+	        	n_reads_with_no_barcode += 1
+	        	nobarcodes_forward.write(f_line1); nobarcodes_forward.write(f_line2); nobarcodes_forward.write(f_line3); nobarcodes_forward.write(f_line4)
+	        	nobarcodes_reverse.write(r_line1); nobarcodes_reverse.write(r_line2); nobarcodes_reverse.write(r_line3); nobarcodes_reverse.write(r_line4)
 
-	        		
-	    print "\nNumber of reads found containg barcodes: %i (out of %i).\n" % (n_barcodes_found, n_pairs)
+	    print "\nSummary:"
+	    print "Number of reads without barcodes: %i (out of %i)." % (n_reads_with_no_barcode, n_pairs)
+	    print "Number of reads found with barcodes: %i (out of %i)." % (n_barcodes_found, n_pairs)
+
 	    print "Of the %i reads containing barcodes, %i were found on\nthe forward and %i were found on the paired-end read.\n" % (n_barcodes_found, n_barcodes_on_forward, n_barcodes_on_reverse)
+	    print "Of the %i reads containing barcodes, %i had adjacent cutsites (%i did not)." % (n_barcodes_found,n_reads_with_barcode_yes_cut,n_reads_with_barcode_no_cut)
 else: 
 	print "This block under construction..."
+
+# Housekeeping
+nobarcodes_forward.close()
+nobarcodes_reverse.close()
+barcode_no_cut_forward.close()
+barcode_no_cut_reverse.close()
+barcode_yes_cut_forward.close()
+barcode_yes_cut_reverse.close()
+
+
+
+# Testing
+
+# cutsites
+# b = 'GGCATACCAATGCATAAGCAACGTGCGCCTTTGAGACTTCTAGTTGCTCCCAGATAGCCATAATATCTAGCTAAGTTCAGGATT'
+
+# print b
+# print "*"*10 + b[offset+barcode_length:]
+
+# print "*"*offset + b[(offset):(barcode_length+offset)]
+# # GG
+# # CATACCAA
+# # TGCAT
+
+# if b[offset+barcode_length:].startswith(tuple(cutsites)):
+# 	print "ok"
+
+
+
+
 
 
 
