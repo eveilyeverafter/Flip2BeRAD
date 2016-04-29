@@ -25,7 +25,7 @@ Multiple cut sites can simultaneously be searched.
 with a barcode but no adjacent cut site, and c) filtered reads containing
 a barcode and a cut site.
 
-To install, clone the github repo and navigate to Flip2BeRAD.py script. 
+To run, clone the github repo and navigate to the directory containing the Flip2BeRAD.py script. 
 For help, type in the following:
 ``` 
 python Flip2BeRAD.py -h
@@ -38,8 +38,15 @@ that you use this version of Python to run.
 ## The C++ version of Flip2BeRAD
 
 This version is most actively under development. 
+To compile, clone the github repo and navigate to the directory containing the main.cpp. 
+Type in:
 
 ```
-g++ main.cpp -o Flip2BeRAD
+g++ main.cpp -o Flip2BeRAD 
+or
+clang++ main.cpp -o Flip2BeRAD # Some OS X variants
 ```
+
+
+
 
