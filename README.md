@@ -39,5 +39,7 @@ that you use this version of Python to run.
 
 This version is most actively under development. 
 
-
+```
+g++ main.cpp -o Flip2BeRAD
+```
 
