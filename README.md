@@ -1,5 +1,5 @@
 # Flip2BeRAD
-A Python and C++ utilities for flipping RADseq reads
+Python and C++ utilities for flipping RADseq reads
 
 Flip2BeRAD is a utility for flipping the forward and reverse raw
 reads generated from paired-end sequencing. For some RADseq protocols
@@ -10,7 +10,7 @@ flavors of Flip2BeRAD: a fuller feature python script and a quicker C++
 program. 
 
 
-# The Python version of Flip2BeRAD
+## The Python version of Flip2BeRAD
 
 Flip2BeRAD.py performs the following tasks: 
 
@@ -35,7 +35,7 @@ Please note, Flip2BeRAD was built under Python 2.7 so it is recommended
 that you use this version of Python to run. 
 
 
-# The C++ version of Flip2BeRAD
+## The C++ version of Flip2BeRAD
 
 This version is most actively under development. 
 
