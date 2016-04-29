@@ -129,9 +129,10 @@ Go to https://github.com/tylerhether/Flip2BeRAD for more information.\n"""
 		print 'The forward fastq file is ', forward_file
 		print 'The reverse fastq file is ', reverse_file
 		print 'The barcode file is ', barcodes_file
-		print 'The number of mismatches allowed in the bacode sequence: %d\n\n' % n_mismatches
+		print 'The number of mismatches allowed in the barcode sequence: %d\n\n' % n_mismatches
 		if offset !=0:
 			print 'Offsetting by %i basepairs' % offset
+		print 'Initializing...'
 	else:
 		sys.stdout.write_silent("""
 This is Flip2BeRAD. Run this scrpt with -h flag to see the help file.
@@ -162,7 +163,7 @@ def mismatch_it(s, d=n_mismatches):
 def enumerate_mismatches(b_file, m):
 	""" This function returns a list of all the possible mismatches """
 	if VERBOSE:
-		print "Creating a list of mismatched barcodes."
+		print "Importing barcodes..."
 	bars = []
 
 	if m !=0:
@@ -223,7 +224,7 @@ def check_lengths(f, r):
 if VERBOSE:
 	# get some simple size data for making progress bars and log files
 	n_pairs = check_lengths(forward_file, reverse_file) # Gets the number of pairs
-	increment = round((n_pairs / 10)) # For showing progress percentages
+	increment = round((n_pairs / 100)) # For showing progress percentages
 
 # Here's the enumerated (fuzzy matched) barcodes
 bars = enumerate_mismatches(barcodes_file, n_mismatches)
@@ -262,7 +263,7 @@ if VERBOSE:
 	        f_line1, f_line2, f_line3, f_line4, r_line1, r_line2, r_line3, r_line4 = flatten(zipped_pair)
 	        # Prints percentage at 10% intervals (i.e., when VERBOSE == True)
 	        if i % increment == 0:
-	        	print "%d%% complete\r" % (10*i/increment + 10)
+	        	print "%d%% complete\r" % (i/increment)
 	        # 2. (fuzzy) Barcode present on of the reads?
 	        if (f_line2[(offset):(barcode_length+offset)] in bars) or (r_line2[offset:(barcode_length+offset)] in bars): 
 	        	n_barcodes_found += 1
