@@ -2,7 +2,7 @@ import itertools # For grouping pair-end reads together
 import sys, getopt # For parsing command line args
 import os.path # For checking whether a given file exists
 from itertools import combinations, product
-from Bio.Seq import reverse_complement # working with strings
+# from Bio.Seq import reverse_complement # working with strings
 import sys
 
 

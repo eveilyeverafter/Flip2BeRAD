@@ -246,7 +246,7 @@ int main(int argc, const char * argv[]) {
 /*
  * This block checks that the paired-end files are the same length.
  * It's also needed to store the number of lines.
- *
+ * This block is really slow...
  */
     
     int number_of_lines_forward = 0;
