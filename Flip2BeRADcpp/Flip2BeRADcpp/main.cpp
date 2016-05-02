@@ -294,11 +294,15 @@ int main(int argc, const char * argv[]) {
     
     string f_line1, f_line2, f_line3, f_line4;
     string r_line1, r_line2, r_line3, r_line4;
-//    int count(0); // Testing...
+    int count(0); // Testing...
 //    for(int i = 0; i < number_of_lines_forward; i++)
 //    {
     while( !forward_file.eof() )
     {
+        count +=1;
+        if(count % 10000 == 0){
+            cout << "Processing read " << count << "..." << endl;
+        }
         // Get the fastq info for the forward and reverse read...
         getline(forward_file, f_line1);
         getline(forward_file, f_line2);
