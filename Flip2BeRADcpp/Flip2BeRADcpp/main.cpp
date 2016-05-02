@@ -249,33 +249,33 @@ int main(int argc, const char * argv[]) {
  * This block is really slow...
  */
     
-    int number_of_lines_forward = 0;
-    int number_of_lines_reverse = 0;
-
-    fstream forward_file1, reverse_file1;
-
-    cout << "Checking to make sure forward and reverse files are the same length..." << endl;
-    forward_file1.open (forward_file_name);
-    reverse_file1.open (reverse_file_name);
-        
-    while (std::getline(forward_file1, line)){
-        ++number_of_lines_forward;
-    }
-    cout << "The number of lines in the forward fastq is " << number_of_lines_forward << endl;
-        
-    while (std::getline(reverse_file1, line)){
-        ++number_of_lines_reverse;
-    }
-    cout << "The number of lines in the reverse fastq is " << number_of_lines_reverse << endl;
-        
-    forward_file1.close();
-    reverse_file1.close();
-    
-    if (number_of_lines_forward != number_of_lines_reverse)
-    {
-        cout << "Input fastq files need the same length. Aborting." << endl;
-        return (1);
-    }
+    int number_of_lines_forward = 10000;
+//    int number_of_lines_reverse = 0;
+//
+//    fstream forward_file1, reverse_file1;
+//
+//    cout << "Checking to make sure forward and reverse files are the same length..." << endl;
+//    forward_file1.open (forward_file_name);
+//    reverse_file1.open (reverse_file_name);
+//        
+//    while (std::getline(forward_file1, line)){
+//        ++number_of_lines_forward;
+//    }
+//    cout << "The number of lines in the forward fastq is " << number_of_lines_forward << endl;
+//        
+//    while (std::getline(reverse_file1, line)){
+//        ++number_of_lines_reverse;
+//    }
+//    cout << "The number of lines in the reverse fastq is " << number_of_lines_reverse << endl;
+//        
+//    forward_file1.close();
+//    reverse_file1.close();
+//    
+//    if (number_of_lines_forward != number_of_lines_reverse)
+//    {
+//        cout << "Input fastq files need the same length. Aborting." << endl;
+//        return (1);
+//    }
 
 /*
  *
@@ -295,7 +295,9 @@ int main(int argc, const char * argv[]) {
     string f_line1, f_line2, f_line3, f_line4;
     string r_line1, r_line2, r_line3, r_line4;
 //    int count(0); // Testing...
-    for(int i = 0; i < number_of_lines_forward; i++)
+//    for(int i = 0; i < number_of_lines_forward; i++)
+//    {
+    while( !forward_file.eof() )
     {
         // Get the fastq info for the forward and reverse read...
         getline(forward_file, f_line1);
@@ -404,7 +406,7 @@ int main(int argc, const char * argv[]) {
 //        
         
         
-        i += 3;
+//        i += 3;
     }
 //    
 //    string str="CACTTCGA";
@@ -445,7 +447,7 @@ int main(int argc, const char * argv[]) {
 
     cout << "Of the " << n_barcodes_found << " reads containing barcodes, " << n_barcodes_on_forward << " were found on\nthe forward and " << n_barcodes_on_reverse << " were found on the paired-end read." << endl;
     
-    cout << "Of the " << n_barcodes_found << " reads containing barcodes, " << n_reads_with_barcode_yes_cut << " had adjacent cutsites (" << n_reads_with_barcode_no_cut << " did not)." << endl;
+    cout << "Of the " << n_barcodes_found << " reads containing barcodes, " << n_reads_with_barcode_yes_cut << " had adjacent cut sites (" << n_reads_with_barcode_no_cut << " did not)." << endl;
 
     
     //Testing block.
