@@ -249,7 +249,7 @@ int main(int argc, const char * argv[]) {
  * This block is really slow...
  */
     
-    int number_of_lines_forward = 10000;
+//    int number_of_lines_forward = 10000;
 //    int number_of_lines_reverse = 0;
 //
 //    fstream forward_file1, reverse_file1;
@@ -294,7 +294,7 @@ int main(int argc, const char * argv[]) {
     
     string f_line1, f_line2, f_line3, f_line4;
     string r_line1, r_line2, r_line3, r_line4;
-    int count(0); // Testing...
+    long long unsigned int count(0); // Testing...
 //    for(int i = 0; i < number_of_lines_forward; i++)
 //    {
     while( !forward_file.eof() )
@@ -445,8 +445,8 @@ int main(int argc, const char * argv[]) {
  *
  */
     
-    cout << "\nSummary:\nNumber of reads without barcodes: " << n_reads_with_no_barcode << " (out of " << number_of_lines_forward/4 << " pairs)" << endl;
-    cout << "Number of reads found with barcodes: " << n_barcodes_found << " (out of " << number_of_lines_forward/4 << " pairs)" << endl;
+    cout << "\nSummary:\nNumber of reads without barcodes: " << n_reads_with_no_barcode << " (out of " << count-1 << " pairs)" << endl;
+    cout << "Number of reads found with barcodes: " << n_barcodes_found << " (out of " << count-1 << " pairs)" << endl;
     
 
     cout << "Of the " << n_barcodes_found << " reads containing barcodes, " << n_barcodes_on_forward << " were found on\nthe forward and " << n_barcodes_on_reverse << " were found on the paired-end read." << endl;
