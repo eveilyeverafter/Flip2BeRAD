@@ -223,9 +223,9 @@ def check_lengths(f, r):
 
 if VERBOSE:
 	# get some simple size data for making progress bars and log files
-	n_pairs = check_lengths(forward_file, reverse_file) # Gets the number of pairs
-	increment = round((n_pairs / 100)) # For showing progress percentages
-
+	# n_pairs = check_lengths(forward_file, reverse_file) # Gets the number of pairs
+	# increment = round((n_pairs / 100)) # For showing progress percentages
+	pass
 # Here's the enumerated (fuzzy matched) barcodes
 bars = enumerate_mismatches(barcodes_file, n_mismatches)
 barcode_length = len(bars[0])
@@ -243,7 +243,7 @@ barcode_yes_cut_forward = open("filtered_forward.fastq", 'w')
 barcode_yes_cut_reverse = open("filtered_reverse.fastq", 'w')
 
 if VERBOSE:
-	print "Processing %i pairs from files\n%r and\n%r\n" % (n_pairs, forward_file, reverse_file)
+	print "Processing pairs from files\n%r and\n%r\n" % (forward_file, reverse_file)
 	# The main loop. This block: 
 	# 1. iterates 4 lines at a time from each of the f and r fastq files (== 8 total lines)
 	with open(forward_file) as f, open(reverse_file) as r:
@@ -259,11 +259,13 @@ if VERBOSE:
 	    n_reads_with_barcode_no_cut = 0
 	    n_reads_with_barcode_yes_cut = 0
 
+	    count = 0
 	    for i, zipped_pair in enumerate(zipped_pairs):
 	        f_line1, f_line2, f_line3, f_line4, r_line1, r_line2, r_line3, r_line4 = flatten(zipped_pair)
 	        # Prints percentage at 10% intervals (i.e., when VERBOSE == True)
-	        if i % increment == 0:
-	        	print "%d%% complete\r" % (i/increment)
+	        count +=1
+	        if i % 10000 == 0:
+	        	print "Processing read %i..." % i
 	        # 2. (fuzzy) Barcode present on of the reads?
 	        if (f_line2[(offset):(barcode_length+offset)] in bars) or (r_line2[offset:(barcode_length+offset)] in bars): 
 	        	n_barcodes_found += 1
@@ -312,8 +314,8 @@ if VERBOSE:
 	        	nobarcodes_reverse.write(r_line1); nobarcodes_reverse.write(r_line2); nobarcodes_reverse.write(r_line3); nobarcodes_reverse.write(r_line4)
 
 	    print "\nSummary:"
-	    print "Number of reads without barcodes: %i (out of %i)." % (n_reads_with_no_barcode, n_pairs)
-	    print "Number of reads found with barcodes: %i (out of %i)." % (n_barcodes_found, n_pairs)
+	    print "Number of reads without barcodes: %i (out of %i)." % (n_reads_with_no_barcode, count)
+	    print "Number of reads found with barcodes: %i (out of %i)." % (n_barcodes_found, count)
 
 	    print "Of the %i reads containing barcodes, %i were found on\nthe forward and %i were found on the paired-end read.\n" % (n_barcodes_found, n_barcodes_on_forward, n_barcodes_on_reverse)
 	    print "Of the %i reads containing barcodes, %i had adjacent cutsites (%i did not)." % (n_barcodes_found,n_reads_with_barcode_yes_cut,n_reads_with_barcode_no_cut)
