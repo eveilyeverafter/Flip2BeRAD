@@ -6,8 +6,8 @@ reads generated from paired-end sequencing. For some RADseq protocols
 (e.g., BestRAD), the barcode plus cut site combination can 
 occur on the reverse read. This is problematic when downstream programs
 (e.g., stacks) require that these be on the forward read. There are two
-flavors of Flip2BeRAD: a fuller feature python script and a quicker C++
-program. 
+flavors of Flip2BeRAD: a fuller feature python script and a C++
+program. Both perform similarly but right now the Python script is actually faster than the C++ variant, which is the one currently under the most development. 
 
 
 ## The Python version of Flip2BeRAD
@@ -37,8 +37,7 @@ that you use this version of Python to run.
 
 ## The C++ version of Flip2BeRAD
 
-This version is most actively under development. 
-To compile, clone the github repo and navigate to the directory containing the main.cpp. 
+This version is most actively under development. Unlike the Python variant, this one does not allow barcode mismatching nor does it allow multiple cut sites to be coprocessed. To compile, clone the github repo and navigate to the directory containing the main.cpp. 
 Type in:
 
 ```
@@ -46,6 +45,8 @@ g++ main.cpp -o Flip2BeRAD
 or
 clang++ main.cpp -o Flip2BeRAD # Some OS X variants
 ```
+
+Right now there's no help file for this one. (check back soon)
 
 
 
