@@ -1,4 +1,5 @@
 *.pyc
+visavis.sh
 *.DS_Store
 *log.txt
 barcode_no_cut_forward.fastq
