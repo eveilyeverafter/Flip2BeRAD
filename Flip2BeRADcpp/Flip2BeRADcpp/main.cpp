@@ -451,7 +451,7 @@ int main(int argc, const char * argv[]) {
 
     cout << "Of the " << n_barcodes_found << " reads containing barcodes, " << n_barcodes_on_forward << " were found on\nthe forward and " << n_barcodes_on_reverse << " were found on the paired-end read." << endl;
     
-    cout << "Of the " << n_barcodes_found << " reads containing barcodes, " << n_reads_with_barcode_yes_cut << " had adjacent cut sites (" << n_reads_with_barcode_no_cut << " did not)." << endl;
+    cout << "Of the " << n_barcodes_found << " reads containing barcodes, " << n_reads_with_barcode_yes_cut << " had adjacent cut sites (" << n_reads_with_barcode_no_cut-1 << " did not)." << endl;
 
     
     //Testing block.
