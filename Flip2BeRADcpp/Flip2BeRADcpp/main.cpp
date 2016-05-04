@@ -60,7 +60,7 @@ bool adjacent_cutsite(string query, string given_cutsites)
 
 int main(int argc, const char * argv[]) {
 
-    
+    std::ios_base::sync_with_stdio(false);
 /*
  *
  * Open output files
@@ -351,14 +351,14 @@ int main(int argc, const char * argv[]) {
                 {
                     n_reads_with_barcode_yes_cut += 1;
                     //cout << cutsite << " is in " << f_query2 << endl;
-                    barcode_yes_cut_forward << f_line1 << "\n" << f_line2 << "\n" << f_line3 << "\n" << f_line4 << endl;
-                    barcode_yes_cut_reverse << r_line1 << "\n" << r_line2 << "\n" << r_line3 << "\n" << r_line4 << endl;
+                    barcode_yes_cut_forward << f_line1 << "\n" << f_line2 << "\n" << f_line3 << "\n" << f_line4 << "\n";
+                    barcode_yes_cut_reverse << r_line1 << "\n" << r_line2 << "\n" << r_line3 << "\n" << r_line4 << "\n";
                     
                 } else
                 {
                     n_reads_with_barcode_no_cut += 1;
-                    barcode_no_cut_forward << f_line1 << "\n" << f_line2 << "\n" << f_line3 << "\n" << f_line4 << endl;
-                    barcode_no_cut_reverse << r_line1 << "\n" << r_line2 << "\n" << r_line3 << "\n" << r_line4 << endl;
+                    barcode_no_cut_forward << f_line1 << "\n" << f_line2 << "\n" << f_line3 << "\n" << f_line4 << "\n";
+                    barcode_no_cut_reverse << r_line1 << "\n" << r_line2 << "\n" << r_line3 << "\n" << r_line4 << "\n";
                 }
                 
             } else
@@ -370,20 +370,20 @@ int main(int argc, const char * argv[]) {
                 if(r_query2.find(cutsite) == 0)
                 {
                     n_reads_with_barcode_yes_cut += 1;
-                    barcode_yes_cut_reverse << f_line1 << "\n" << f_line2 << "\n" << f_line3 << "\n" << f_line4 << endl;
-                    barcode_yes_cut_forward << r_line1 << "\n" << r_line2 << "\n" << r_line3 << "\n" << r_line4 << endl;
+                    barcode_yes_cut_reverse << f_line1 << "\n" << f_line2 << "\n" << f_line3 << "\n" << f_line4 << "\n";
+                    barcode_yes_cut_forward << r_line1 << "\n" << r_line2 << "\n" << r_line3 << "\n" << r_line4 << "\n";
                 } else
                 {
                     n_reads_with_barcode_no_cut += 1;
-                    barcode_no_cut_forward << f_line1 << "\n" << f_line2 << "\n" << f_line3 << "\n" << f_line4 << endl;
-                    barcode_no_cut_reverse << r_line1 << "\n" << r_line2 << "\n" << r_line3 << "\n" << r_line4 << endl;
+                    barcode_no_cut_forward << f_line1 << "\n" << f_line2 << "\n" << f_line3 << "\n" << f_line4 << "\n";
+                    barcode_no_cut_reverse << r_line1 << "\n" << r_line2 << "\n" << r_line3 << "\n" << r_line4 << "\n";
                 }
             }
         } else
         {
             n_reads_with_no_barcode += 1;
-            nobarcodes_forward << f_line1 << "\n" << f_line2 << "\n" << f_line3 << "\n" << f_line4 << endl;
-            nobarcodes_reverse << r_line1 << "\n" << r_line2 << "\n" << r_line3 << "\n" << r_line4 << endl;
+            nobarcodes_forward << f_line1 << "\n" << f_line2 << "\n" << f_line3 << "\n" << f_line4 << "\n";
+            nobarcodes_reverse << r_line1 << "\n" << r_line2 << "\n" << r_line3 << "\n" << r_line4 << "\n";
             
         }
         
