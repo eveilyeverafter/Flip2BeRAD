@@ -49,9 +49,9 @@ This version is a bare-bones version of the Python script and is most actively u
 Type in:
 
 ```
-g++ main.cpp -o Flip2BeRAD 
+g++ main.cpp -O3 -o Flip2BeRAD
 or
-clang++ main.cpp -o Flip2BeRAD # Some OS X variants
+clang++ main.cpp -03 -o Flip2BeRAD # Some OS X variants
 ```
 
 Right now there's no help file for this variant but command-line options are similar between the two. To run the example, type in:
