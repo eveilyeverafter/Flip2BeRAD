@@ -59,6 +59,10 @@ Help file for Flip2BeRAD.
 	region.	Warning, this should not be above 0 if barcodes are not 
 	'redundant'.
 
+-o <offset bases>
+	The number of basepairs to offset from the 5' end of the read when
+	searching for barcodes.
+
 -q <quiet>
 	Optional. Turn off verbose printing. 	
 	"""

@@ -109,6 +109,44 @@ int main(int argc, const char * argv[]) {
  */
 
     // Search for the quiet flag
+    
+    for(int i=1; i<argc; i++)
+    {
+        if(string(argv[i]) == "-h")
+        {
+            cout << "Flip2BeRAD usuage:" << endl;
+            cout << "-c <cutsite>\n" <<
+                "\tThe restriction cut site(s) used. Currently, the actual sequence\n" <<
+                "\tis needed. Default (TGCAT).\n" << endl;
+            
+            cout << "-f <foward file>" << endl;
+            cout << "\tThe forward reads fastq file. Must be the same length as the reverse\n" <<
+                "\t(paired-end) fastq file.\n" << endl;
+            
+            cout << "-r <reverse file>" << endl;
+            cout << "\tThe reverse (paired-end) reads fastq file. Must be the same length as\n" <<
+                "\tthe forward fastq file.\n" << endl;
+            
+            cout << "-b <barcodes file>" << endl;
+            cout << "\tA one-column file specifiying the sequnence of each of the sample\n" <<
+                "\tbarcodes to use. Currently these barcodes need to be the *same* length.\n" << endl;
+            
+            cout << "-o <offset bases>" << endl;
+            cout << "\tThe number of basepairs to offset from the 5' end of the read when\n" <<
+                "\tsearching for barcodes (Default 0).\n" << endl;
+            
+            cout << "-q <0/1>" << endl;
+            cout << "\tFor verbose printing, set to 0 (Default)." << endl;
+            
+            cout << "-h" << endl;
+            cout << "\tDisplay this help message." << endl;
+            
+            return (1);
+            
+        }
+    }
+   
+    
     for(int i=1; i<argc; i++)
     {
         if(string(argv[i]) == "-q"){
