@@ -59,7 +59,7 @@ bool adjacent_cutsite(string query, string given_cutsites)
 
 
 int main(int argc, const char * argv[]) {
-
+//int main(int argc, char *argv[]){
     std::ios_base::sync_with_stdio(false);
 /*
  *
@@ -300,8 +300,10 @@ int main(int argc, const char * argv[]) {
     while( !forward_file.eof() )
     {
         count +=1;
-        if(count % 10000 == 0){
-            cout << "Processing read " << count << "..." << endl;
+        if (!quiet){
+            if(count % 10000 == 0){
+                cout << "Processing read " << count << "..." << endl;
+            }
         }
         // Get the fastq info for the forward and reverse read...
         getline(forward_file, f_line1);
