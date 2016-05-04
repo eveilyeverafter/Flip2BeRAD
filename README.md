@@ -62,7 +62,7 @@ For help and usage, type:
 For an example, try:
 
 ```
-./Flip2BeRAD -c TGCAT -f ../../examples/forward_test.fastq -r ../../examples/reverse_test.fastq -b ../../examples/barcodes76.txt -m 0 -o 2 -q 0
+./Flip2BeRAD -c TGCAT -f ../../examples/forward_test.fastq -r ../../examples/reverse_test.fastq -b ../../examples/barcodes76.txt -o 2 -q 0
 ```
 
 
