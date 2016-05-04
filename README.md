@@ -54,7 +54,12 @@ or
 clang++ main.cpp -03 -o Flip2BeRAD # Some OS X variants
 ```
 
-Right now there's no help file for this variant but command-line options are similar between the two. To run the example, type in:
+For help and usage, type:
+```
+./Flip2BeRAD -h
+
+```
+For an example, try:
 
 ```
 ./Flip2BeRAD -c TGCAT -f ../../examples/forward_test.fastq -r ../../examples/reverse_test.fastq -b ../../examples/barcodes76.txt -m 0 -o 2 -q 0
