@@ -7,8 +7,8 @@ found on the reverse (paired-end) read. For some RADseq protocols
 (e.g., BestRAD), the barcode plus cut site combination can 
 occur on the reverse read. This is problematic when downstream programs
 (e.g., stacks) require that these be on the forward read. There are two
-flavors of Flip2BeRAD: a fuller feature Python script and a C++
-program. Both perform similarly but currently the Python version has 
+flavors of Flip2BeRAD: a fuller featured Python script and a quicker C++
+variant. Both perform similarly but currently the Python version has 
 more functionality. 
 
 
