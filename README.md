@@ -10,7 +10,7 @@ occur on the reverse read. This is problematic when downstream programs
 flavors of Flip2BeRAD: a fuller featured Python script and a quicker C++
 variant. Both perform similarly but currently the Python version has 
 more functionality. 
-
+#
 
 ## The Python version of Flip2BeRAD
 
